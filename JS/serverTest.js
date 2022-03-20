@@ -10,8 +10,10 @@ const server = http.createServer((request, response) => {
     response.end("Button Mash Server. Beep Boop");
 });
 
-server.listen(8080, () => {
-    console.log("Server has started listening on port 8080.");
+let port = process.env.PORT || 8080;
+
+server.listen(port, () => {
+    console.log(`Server has started listening on port ${port}.`);
 });
 
 let wsServer = new websocket.server({
