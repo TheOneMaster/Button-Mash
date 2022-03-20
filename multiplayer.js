@@ -14,7 +14,8 @@ let multiplayer = {
     },
 
     start: function() {
-        const websocketUrl = location.origin.replace(/^http/, 'ws');
+        // const websocketUrl = 'ws://button-mash.herokuapp.com/'
+        const websocketUrl = "ws://localhost:8080"
 
         this.websocket = new WebSocket(websocketUrl);
 
