@@ -1,0 +1,37 @@
+#mplobbyscreen {
+    margin-left: auto;
+    margin-top: auto;
+}
+
+#lobbylist {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14pt;
+    padding: 20px;
+    color: lightblue;
+    text-align: left;
+
+    border-spacing: 10pt;
+}
+
+
+
+.lobbyrow.selected {
+    /* background-color: rgba(39, 68, 102, 0.5); */
+    
+    border-radius: 2pt;
+    box-shadow: 0 0 3pt 2pt blue;
+
+    /* color: orange; */
+}
+
+.starting {
+    color: lightgreen;
+}
+
+.lobbyrow {
+    border-radius: 1pt;
+    box-shadow: 0 0 0 1pt grey;
+    transition: 0.1s;
+    padding: 1px;
+
+}
