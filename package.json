@@ -2,9 +2,9 @@
   "name": "masher",
   "version": "1.0.0",
   "description": "Mashing Game",
-  "main": "server-socket.js",
+  "main": "serverTest.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node JS/serverTest.js"
   },
   "author": "TheOneMaster",
   "license": "MIT",
