@@ -1,0 +1,14 @@
+{
+  "name": "masher",
+  "version": "1.0.0",
+  "description": "Mashing Game",
+  "main": "server-socket.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "TheOneMaster",
+  "license": "MIT",
+  "dependencies": {
+    "websocket": "^1.0.34"
+  }
+}
