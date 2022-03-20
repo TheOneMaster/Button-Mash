@@ -38,8 +38,9 @@ let multiplayer = {
                 multiplayer.updateLobbyStatus(messageObject.lobbies);
                 break;
 
-            case "joined-room":
+            case "joined-lobby":
                 multiplayer.lobbyId = messageObject.lobbyId;
+                multiplayer.lobbySetup();
                 break;
         }
     },
@@ -80,10 +81,20 @@ let multiplayer = {
         }
 
         // Create new row for each lobby
-        lobbylist.forEach((status, index) => {
-            let statusMessage = multiplayer.statusMessages[status];
+        lobbylist.forEach((lobby, index) => {
+            
+            /*
+            The lobby format is as follows: {
+                status: str from list ['empty', 'waiting', 'starting', 'running'],
+                players: num of players in the lobby 
+            }
+            */
+
+            let status = lobby.status;
+            // let statusMessage = multiplayer.statusMessages[status];
             let lobbyId = index + 1;
-            let label = `Game ${lobbyId} - ${statusMessage}`;
+            let players = lobby.players;
+            let label = `${lobbyId} - ${players} players`;
             
             let row = document.createElement("tr");
             let cell = document.createElement("td");
@@ -125,6 +136,39 @@ let multiplayer = {
             document.getElementById("lobbyjoin").disabled = true;
         } else {
             console.log("Select lobby to join");
+            alert("You must select a lobby before joining.");
         }
+    },
+
+    leaveLobby: () => {
+        if (multiplayer.lobbyId) {
+            multiplayer.sendWebSocketMessage({type: 'leave-lobby', lobbyId: multiplayer.lobbyId})
+            document.getElementById("lobbylist").disabled = false;
+            document.getElementById("lobbyjoin").disabled = false;
+
+            document.getElementById("lobbyleave").hidden = true;
+            document.getElementById("lobbyjoin").hidden = false;
+
+            delete multiplayer.lobbyId;
+
+            let lobbylist = document.getElementById("lobbylist");
+            lobbylist.removeAttribute("selected");
+            
+            delete lobbylist.value;
+        }
+    },
+
+
+    lobbySetup: function() {
+        let lobbylist = document.getElementById("lobbylist");
+
+        lobbylist.setAttribute("selected", "true");
+
+        let lobbyjoin = document.getElementById("lobbyjoin");
+        lobbyjoin.hidden = true;
+
+        let lobbyleave = document.getElementById("lobbyleave");
+        lobbyleave.hidden = false;
     }
+
 }

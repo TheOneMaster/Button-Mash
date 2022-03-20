@@ -46,7 +46,8 @@ function createLobbyString() {
     let lobbies = [];
 
     for (let i=0; i < gameLobbies.length; i++) {
-        lobbies.push(gameLobbies[i].status);
+        let lobby = {status: gameLobbies[i].status, players: gameLobbies[i].players.length}
+        lobbies.push(lobby);
     }
 
     let message = {type: "lobby-list", lobbies: lobbies};
@@ -84,7 +85,7 @@ function joinLobby(player, lobbyId) {
     }
         
 
-    let confirmationMessage = { type: "joined-room", lobbyId: lobbyId}
+    let confirmationMessage = { type: "joined-lobby", lobbyId: lobbyId}
     let confirmationMessageString = JSON.stringify(confirmationMessage);
 
 
@@ -118,8 +119,8 @@ let players = []
 
 wsServer.on("request", (request) => {
     let connection = request.accept();
-
-    console.log(`Connection from ${request.remoteAddress} accepted.`);
+    let currentTime = new Date();
+    console.log(`Connection from ${request.remoteAddress} accepted at ${currentTime}`);
 
     let player = {
         "connection": connection,

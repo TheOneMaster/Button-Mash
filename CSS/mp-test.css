@@ -1,19 +1,64 @@
+/* Lobby CSS */
+
+
+/* ID CSS */
 #mplobbyscreen {
     margin-left: auto;
     margin-top: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #lobbylist {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 14pt;
+    font-size: 20pt;
     padding: 20px;
     color: lightblue;
     text-align: left;
 
     border-spacing: 10pt;
+
+    transition: 1s;
+    -webkit-transition-property: all;
 }
 
+/* #lobbylist[selected="true"] {
+    align-self: start;
+} */
 
+/* Lobby Join Button */
+
+/* #lobbyjoin {
+
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 12px;
+    border-color: black;
+
+    padding: 10px 30px;
+    
+    background-color: rgb(100, 150, 200);
+    color:orange;
+
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+    font-style: bold;
+
+    transition: 0.3s;
+    
+}
+
+#lobbyjoin:hover:enabled {
+    transform: scale(1.2) perspective(1px);
+
+} */
+
+.lobbybutton {
+    border-radius: 12px;
+    padding: 10px 30px;
+}
 
 .lobbyrow.selected {
     /* background-color: rgba(39, 68, 102, 0.5); */
