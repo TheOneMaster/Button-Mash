@@ -14,7 +14,7 @@ let multiplayer = {
     },
 
     start: function() {
-        const websocketUrl = `ws://${window.location.hostname || "localhost"}:8080`;
+        const websocketUrl = location.origin.replace(/^http/, 'ws');
 
         this.websocket = new WebSocket(websocketUrl);
 

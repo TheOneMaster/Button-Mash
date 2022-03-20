@@ -2,9 +2,9 @@
   "name": "masher",
   "version": "1.0.0",
   "description": "Mashing Game",
-  "main": "serverTest.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node JS/serverTest.js"
+    "start": "node 'Server Side JS/serverTest.js'"
   },
   "author": "TheOneMaster",
   "license": "MIT",
