@@ -38,17 +38,60 @@ for (let i=0; i < numLobby; i++) {
     gameLobbies.push({
         status: "empty",
         players: [],
+        scores: undefined,
         lobbyId: i+1
     });
 }
 
-// Create a JSON object for the lobby list
+function initializeGame(lobbyId) {
 
+    let lobby = gameLobbies[lobbyId-1];
+    lobby.playersReady = 0;
+
+    let scores = {};
+
+    lobby.players.forEach((player) => {
+        scores[player.username] = null;
+    });
+
+    lobby.scores = scores;
+
+    let message = { type: "init-game", players: lobby.players.map((player) => player.username)};
+    sendLobbyWebSocketMessage(lobby, message);
+}
+
+function storeLobbyScores(score, player) {
+    let lobby = player.lobby;
+
+    lobby.scores[player.username] = score;
+    // lobby.scores.push(score);
+}
+
+function scoresNotNull(scores) {
+
+    for (let key in scores) {
+        if (scores[key] === null) {
+            return false;
+        }
+    }
+
+    return true;
+
+}
+
+
+// Lobby Functions
+
+// Create a JSON object for the lobby list
 function createLobbyString() {
     let lobbies = [];
 
     for (let i=0; i < gameLobbies.length; i++) {
-        let lobby = {status: gameLobbies[i].status, players: gameLobbies[i].players.length}
+        
+        // Get the array of player usernames in the lobby
+        let players = gameLobbies[i].players.map((player) => player.username);
+        let lobby = {status: gameLobbies[i].status, players: players};
+
         lobbies.push(lobby);
     }
 
@@ -58,13 +101,14 @@ function createLobbyString() {
     return messageString
 }
 
-// Send the 
+// Send the lobby information to an individual connection
 function sendLobbyList(connection) {
     
     let messageString = createLobbyString()
     connection.send(messageString);
 }
 
+// Send lobby information to all connections
 function sendAllLobbyList() {
     let messageString = createLobbyString();
 
@@ -73,10 +117,27 @@ function sendAllLobbyList() {
     });
 }
 
+// Send the player information to the members of the lobby
+function sendLobbyPlayerList(lobbyId) {
+
+    let lobby = gameLobbies[lobbyId-1];
+
+    let players = lobby.players.map((player) => player.username);
+
+    let message = { type: 'player-list', players: players };
+    
+    sendLobbyWebSocketMessage(lobby, message);
+}
+
 function joinLobby(player, lobbyId) {
     let lobby = gameLobbies[lobbyId-1];
 
-    console.log(`Adding player to room ${lobbyId}`);
+    let currentUsernames = lobby.players.map((player) => player.username);
+    if (currentUsernames.includes(player.username)) {
+        throw "2 clients with the same username";
+    }
+
+    console.log(`Adding ${player.username} to room ${lobbyId}`);
     lobby.players.push(player);
     player.lobby = lobby;
 
@@ -86,11 +147,9 @@ function joinLobby(player, lobbyId) {
         lobby.status = "starting";
     }
         
-
-    let confirmationMessage = { type: "joined-lobby", lobbyId: lobbyId}
+    let usernames = lobby.players.map((player) => player.username)
+    let confirmationMessage = { type: "joined-lobby", lobbyId: lobbyId, players: usernames }
     let confirmationMessageString = JSON.stringify(confirmationMessage);
-
-
 
     player.connection.send(confirmationMessageString);
     return lobby
@@ -99,7 +158,7 @@ function joinLobby(player, lobbyId) {
 function leaveLobby(player, lobbyId) {
     let lobby = gameLobbies[lobbyId-1];
 
-    console.log(`Removing player from lobby ${lobbyId}`);
+    console.log(`Removing ${player.username} from lobby ${lobbyId}`);
 
     let index = lobby.players.indexOf(player);
     if (index > -1) {
@@ -115,6 +174,13 @@ function leaveLobby(player, lobbyId) {
     }
 }
 
+function sendLobbyWebSocketMessage(lobby, messageObject) {
+    let messageString = JSON.stringify(messageObject);
+    
+    lobby.players.forEach((player) => {
+        player.connection.send(messageString);
+    });
+}
 
 // Store all players connected to the server
 let players = []
@@ -126,7 +192,7 @@ wsServer.on("request", (request) => {
 
     let player = {
         "connection": connection,
-        "name": "test",
+        "username": undefined,
         "latencyTrips": []
     };
 
@@ -142,16 +208,42 @@ wsServer.on("request", (request) => {
 
             switch (clientMessage.type) {
                 case "join-lobby":
-                    joinLobby(player, clientMessage.lobbyId);
+                    player.username = clientMessage.username;
+                    try {
+                        joinLobby(player, clientMessage.lobbyId);
+                    } catch (e) {
+                        break;
+                    }
                     sendAllLobbyList();
+                    sendLobbyPlayerList(clientMessage.lobbyId);
                     break;
                 
                 case "leave-lobby":
                     leaveLobby(player, clientMessage.lobbyId);
                     sendAllLobbyList();
+                    sendLobbyPlayerList(clientMessage.lobbyId);
+                    break;
+
+                case "game-begin":
+                    initializeGame(clientMessage.lobbyId);
                     break;
 
                 case "game-tick":
+                    storeLobbyScores(clientMessage.score, player);
+
+                    let scores = player.lobby.scores;
+
+                    if (scoresNotNull(scores)){
+                        let message = {
+                            type: 'update-score',
+                            scores: player.lobby.scores
+                        };
+    
+                        sendLobbyWebSocketMessage(player.lobby, message);
+                        Object.keys(scores).forEach((i) => scores[i] = null);
+                        
+                    }
+                    
             }
         }
     });
@@ -169,6 +261,7 @@ wsServer.on("request", (request) => {
         if (lobby) {
             leaveLobby(player, lobby.lobbyId);
             sendAllLobbyList();
+            sendLobbyPlayerList(lobby.lobbyId);
         }
     });
 
