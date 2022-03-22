@@ -28,6 +28,11 @@ function isConnectionAllowed(request) {
     return true
 }
 
+function sendMessageToClient(connection, messageObject) {
+    let messageString = JSON.stringify(messageObject);
+    connection.send(messageString);
+}
+
 // Game stuff
 
 // Create the lobbies
@@ -82,6 +87,16 @@ function scoresNotNull(scores) {
 
 // Lobby Functions
 
+function checkUsernameExist(playername, lobbyId) {
+    let lobby = gameLobbies[lobbyId-1];
+    let usernames = lobbyId.players.map((player) => player.username);
+
+    if (usernames.includes(playername)) {
+        return true;
+    }
+    return false;
+}
+
 // Create a JSON object for the lobby list
 function createLobbyString() {
     let lobbies = [];
@@ -132,11 +147,6 @@ function sendLobbyPlayerList(lobbyId) {
 function joinLobby(player, lobbyId) {
     let lobby = gameLobbies[lobbyId-1];
 
-    let currentUsernames = lobby.players.map((player) => player.username);
-    if (currentUsernames.includes(player.username)) {
-        throw "2 clients with the same username";
-    }
-
     console.log(`Adding ${player.username} to room ${lobbyId}`);
     lobby.players.push(player);
     player.lobby = lobby;
@@ -149,9 +159,8 @@ function joinLobby(player, lobbyId) {
         
     let usernames = lobby.players.map((player) => player.username)
     let confirmationMessage = { type: "joined-lobby", lobbyId: lobbyId, players: usernames }
-    let confirmationMessageString = JSON.stringify(confirmationMessage);
-
-    player.connection.send(confirmationMessageString);
+    
+    sendMessageToClient(player.connection, confirmationMessage);
     return lobby
 }
 
@@ -208,14 +217,15 @@ wsServer.on("request", (request) => {
 
             switch (clientMessage.type) {
                 case "join-lobby":
-                    player.username = clientMessage.username;
-                    try {
+                    if (!checkUsernameExist(clientMessage.username, clientMessage.lobbyId)) {
+                        player.username = clientMessage.username;
                         joinLobby(player, clientMessage.lobbyId);
-                    } catch (e) {
-                        break;
-                    }
-                    sendAllLobbyList();
-                    sendLobbyPlayerList(clientMessage.lobbyId);
+                        sendAllLobbyList();
+                        sendLobbyPlayerList(clientMessage.lobbyId);
+                    } else {
+                        let message = {type: 'failed-join'};
+                        sendMessageToClient(player.connection, message);
+                    }            
                     break;
                 
                 case "leave-lobby":
