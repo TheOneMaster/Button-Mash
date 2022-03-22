@@ -89,7 +89,7 @@ function scoresNotNull(scores) {
 
 function checkUsernameExist(playername, lobbyId) {
     let lobby = gameLobbies[lobbyId-1];
-    let usernames = lobbyId.players.map((player) => player.username);
+    let usernames = lobby.players.map((player) => player.username);
 
     if (usernames.includes(playername)) {
         return true;
