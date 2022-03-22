@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Masher MP</title>
+        <script src="game.js"></script>
+        <script src="multiplayer.js"></script>
+        <link rel="stylesheet" href="CSS/mp-test.css">
+    </head>
+    <body onload="multiplayer.start()">
+        <div id="main">
+            <div id="mplobbyscreen">
+                <table id="lobbylist" class="lobbytable"></table>
+                <table id="playerlist" class="lobbytable" hidden></table>
+                <input type="button" value="Join" id="lobbyjoin" class="lobbybutton" onclick="multiplayer.joinLobby()">
+                <input type="button" value="Leave" id="lobbyleave" class="lobbybutton" onclick="multiplayer.leaveLobby()" hidden>
+                <button id="gameStart" class="lobbybutton" onclick="multiplayer.beginGame()" hidden>Begin</button>
+            </div>
+            <div id="options">
+                <input type="text" id="username-input" placeholder="Enter your username">
+            </div>
+        </div>
+        
+        <div id="gameOutput"></div>
+    </body>
+</html>

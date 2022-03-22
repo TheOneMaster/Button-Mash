@@ -1,63 +1,52 @@
 /* Lobby CSS */
 
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 
 /* ID CSS */
 #mplobbyscreen {
-    margin-left: auto;
-    margin-top: auto;
-
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
-    align-items: center;
+    align-items: baseline;
 }
 
 #lobbylist {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 20pt;
-    padding: 20px;
     color: lightblue;
-    text-align: left;
-
-    border-spacing: 10pt;
-
-    transition: 1s;
-    -webkit-transition-property: all;
 }
 
-/* #lobbylist[selected="true"] {
-    align-self: start;
-} */
-
-/* Lobby Join Button */
-
-/* #lobbyjoin {
-
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 12px;
-    border-color: black;
-
-    padding: 10px 30px;
-    
-    background-color: rgb(100, 150, 200);
-    color:orange;
-
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 20px;
-    font-style: bold;
-
-    transition: 0.3s;
-    
+#player-table {
+    display: inline-block;
 }
 
-#lobbyjoin:hover:enabled {
-    transform: scale(1.2) perspective(1px);
+#options {
+    /* display: inline-flex; */
+    position: relative;
+    align-self: center;
+    top: -20px;
+    left: 30px;
+}
 
-} */
+#username-input {
+    font-size: 15px;
+    border-radius: 10px;
+    border-style: ridge;
+    padding: 15px 40px;
+    text-align: center;
+    /* align-self: center; */
+}
+
+#main {
+    display: flex;
+}
+
+/* Class CSS */
 
 .lobbybutton {
     border-radius: 12px;
     padding: 10px 30px;
+    align-self: center;
 }
 
 .lobbyrow.selected {
@@ -69,6 +58,11 @@
     /* color: orange; */
 }
 
+.selected {
+    box-shadow: 0 0 3px 2px blue;
+}
+
+
 .starting {
     color: lightgreen;
 }
@@ -77,6 +71,20 @@
     border-radius: 1pt;
     box-shadow: 0 0 0 1pt grey;
     transition: 0.1s;
-    padding: 1px;
+    padding: 10px;
 
+}
+
+.lobbytable {
+    padding: 20px;
+    text-align: left;
+    font-size: 20px;
+}
+
+.lobbytablecell {
+    padding: inherit;
+}
+
+.playerrow[selected="true"] {
+    color: greenyellow;
 }

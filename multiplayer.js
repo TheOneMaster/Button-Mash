@@ -5,7 +5,7 @@ let multiplayer = {
     // Store the websocket connection here
     websocket: undefined,
 
-    // Lobby possibilities
+    // Lobby state possibilities
     statusMessages: {
         "starting": "Game starting",
         "running": "Game in Progress",
@@ -14,7 +14,8 @@ let multiplayer = {
     },
 
     start: function() {
-        const websocketUrl = location.origin.replace(/^http/, 'ws');
+        // const websocketUrl = 'ws://button-mash.herokuapp.com/'
+        const websocketUrl = "ws://localhost:8080"
 
         this.websocket = new WebSocket(websocketUrl);
 
@@ -42,6 +43,23 @@ let multiplayer = {
                 multiplayer.lobbyId = messageObject.lobbyId;
                 multiplayer.lobbySetup();
                 break;
+
+            case "failed-join":
+                //TODO: Create an alert for when the username is already present in the lobby
+                break;
+            
+            case 'player-list':
+                multiplayer.updateLobbyPlayers(messageObject.players);
+                break;
+
+            case "init-game":
+                multiplayer.initGame(messageObject.players);
+                break;
+
+            case "update-score":
+                multiplayer.updateScore(messageObject.scores);
+                break;
+
         }
     },
 
@@ -93,7 +111,7 @@ let multiplayer = {
             let status = lobby.status;
             // let statusMessage = multiplayer.statusMessages[status];
             let lobbyId = index + 1;
-            let players = lobby.players;
+            let players = lobby.players.length;
             let label = `${lobbyId} - ${players} players`;
             
             let row = document.createElement("tr");
@@ -101,6 +119,7 @@ let multiplayer = {
 
             cell.innerHTML = label;
             cell.value = lobbyId;
+            cell.classList.add("lobbytablecell");
 
             row.appendChild(cell);
 
@@ -127,26 +146,34 @@ let multiplayer = {
 
     joinLobby: () => {
         let selectedLobby = document.getElementById("lobbylist").value;
+        let username = document.getElementById("username-input").value;
 
-        if (selectedLobby) {
+        if (selectedLobby && username) {
 
-            multiplayer.sendWebSocketMessage({type: "join-lobby", lobbyId: selectedLobby});
+            multiplayer.sendWebSocketMessage({type: "join-lobby", lobbyId: selectedLobby, username: username});
 
-            document.getElementById("lobbylist").disabled = true;
-            document.getElementById("lobbyjoin").disabled = true;
-        } else {
+            multiplayer.username = username;
+        } else if (!selectedLobby){
             console.log("Select lobby to join");
-            alert("You must select a lobby before joining.");
-        }
+            // alert("You must select a lobby before joining.");
+        } 
     },
 
     leaveLobby: () => {
         if (multiplayer.lobbyId) {
             multiplayer.sendWebSocketMessage({type: 'leave-lobby', lobbyId: multiplayer.lobbyId})
+        
+            // Allow interacting with the lobby system again
             document.getElementById("lobbylist").disabled = false;
             document.getElementById("lobbyjoin").disabled = false;
 
+            // Hide unnecessary elements
             document.getElementById("lobbyleave").hidden = true;
+            document.getElementById("gameStart").hidden = true;
+            document.getElementById("playerlist").hidden = true;
+
+            // Show necessary elements
+            document.getElementById("lobbylist").hidden = false;
             document.getElementById("lobbyjoin").hidden = false;
 
             delete multiplayer.lobbyId;
@@ -155,20 +182,108 @@ let multiplayer = {
             lobbylist.removeAttribute("selected");
             
             delete lobbylist.value;
+
+            document.getElementById("username-input").readOnly = false;
+        }
+    },
+
+    lobbySetup: function() {
+
+        // Set the lobby list as having been selected
+        document.getElementById("lobbylist").hidden = true;
+
+        // Disable the join button and hide it
+        document.getElementById("lobbyjoin").hidden = true;
+
+        // Show the leave lobby button
+        document.getElementById("lobbyleave").hidden = false;
+
+        document.getElementById("lobbylist").disabled = true;
+        document.getElementById("lobbyjoin").disabled = true;
+
+        document.getElementById("username-input").readOnly = true;
+
+    },
+
+    updateLobbyPlayers: function(players) {
+
+        // Create a table of all players currently in the lobby
+
+        let table = document.getElementById('playerlist');
+        table.hidden = false;
+
+        for (let i=table.rows.length-1; i>=0; i--) {
+            table.deleteRow(i)
+        }
+
+        players.forEach((player) => {
+            let row = document.createElement('tr');
+            let cell = document.createElement('td');
+
+            cell.innerHTML = player;
+            cell.classList.add("lobbytablecell");
+            row.classList.add("playerrow", "lobbyrow");
+            row.appendChild(cell);
+
+            if (player === multiplayer.username) {
+                row.setAttribute("selected", "true");
+                cell.innerHTML = "You";
+            }
+
+            table.appendChild(row);
+
+        })
+
+        // Show start button if lobby has enough players
+        let start_button = document.getElementById("gameStart");
+        if (players.length >= 2) {
+            start_button.hidden = false;
+        } else {
+            start_button.hidden = true;
         }
     },
 
 
-    lobbySetup: function() {
-        let lobbylist = document.getElementById("lobbylist");
+    // Game logic
+    beginGame: () => {
+        let message = { type: 'game-begin', lobbyId: multiplayer.lobbyId};
 
-        lobbylist.setAttribute("selected", "true");
+        multiplayer.sendWebSocketMessage(message);
+    },
 
-        let lobbyjoin = document.getElementById("lobbyjoin");
-        lobbyjoin.hidden = true;
+    initGame: function(players) {
 
-        let lobbyleave = document.getElementById("lobbyleave");
-        lobbyleave.hidden = false;
+
+        let gameOutput = document.getElementById("gameOutput");
+
+        // Hide elements
+        document.getElementById("gameStart").hidden = true;
+
+        players.forEach((player) => {
+            let score_track = document.createElement("p");
+            score_track.innerHTML = `${player} - `;
+
+            let span = document.createElement('span');
+            span.id = `${player}-score`;
+            score_track.appendChild(span);
+
+            score_track.setAttribute("rows", 10);
+            score_track.setAttribute("cols", 80);
+
+            gameOutput.appendChild(score_track);
+        })
+
+        game.initGame();
+    },
+
+    updateScore: function(scores) {
+        
+        let keys = Object.keys(scores);
+
+        keys.forEach((key) => {
+            let output = document.getElementById(`${key}-score`);
+            output.innerHTML = scores[key].toFixed(3);
+        })
     }
 
 }
