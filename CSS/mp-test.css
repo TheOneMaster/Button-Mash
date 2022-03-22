@@ -41,36 +41,7 @@ body {
     display: flex;
 }
 
-/* #lobbylist[selected="true"] {
-    align-self: start;
-} */
-
-/* Lobby Join Button */
-
-/* #lobbyjoin {
-
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 12px;
-    border-color: black;
-
-    padding: 10px 30px;
-    
-    background-color: rgb(100, 150, 200);
-    color:orange;
-
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 20px;
-    font-style: bold;
-
-    transition: 0.3s;
-    
-}
-
-#lobbyjoin:hover:enabled {
-    transform: scale(1.2) perspective(1px);
-
-} */
+/* Class CSS */
 
 .lobbybutton {
     border-radius: 12px;

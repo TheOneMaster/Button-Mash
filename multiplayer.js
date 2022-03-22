@@ -43,6 +43,10 @@ let multiplayer = {
                 multiplayer.lobbyId = messageObject.lobbyId;
                 multiplayer.lobbySetup();
                 break;
+
+            case "failed-join":
+                //TODO: Create an alert for when the username is already present in the lobby
+                break;
             
             case 'player-list':
                 multiplayer.updateLobbyPlayers(messageObject.players);
@@ -256,8 +260,12 @@ let multiplayer = {
         document.getElementById("gameStart").hidden = true;
 
         players.forEach((player) => {
-            let score_track = document.createElement("textarea");
-            score_track.id = `${player}-score`;
+            let score_track = document.createElement("p");
+            score_track.innerHTML = `${player} - `;
+
+            let span = document.createElement('span');
+            span.id = `${player}-score`;
+            score_track.appendChild(span);
 
             score_track.setAttribute("rows", 10);
             score_track.setAttribute("cols", 80);
@@ -272,15 +280,9 @@ let multiplayer = {
         
         let keys = Object.keys(scores);
 
-        // for (let i=0; i < n; i++) {
-        //     let username = usernames[i];
-        //     let output = document.getElementById(`${username}-score`);
-        //     output.value += `Score - ${scores[i]}\n`;
-        // }
-
         keys.forEach((key) => {
             let output = document.getElementById(`${key}-score`);
-            output.value += `Score - ${scores[key]}\n`;
+            output.innerHTML = scores[key].toFixed(3);
         })
     }
 
